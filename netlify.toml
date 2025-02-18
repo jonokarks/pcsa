@@ -3,44 +3,8 @@
   publish = ".next"
 
 [build.environment]
-  NEXT_USE_NETLIFY_EDGE = "true"
   NODE_VERSION = "18"
   NPM_VERSION = "10"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=(), interest-cohort=()"
-    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
-    Content-Security-Policy = "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data: blob:; font-src 'self' https: data:; connect-src 'self' https: wss:;"
-
-[functions]
-  directory = ".netlify/functions"
-  node_bundler = "esbuild"
-  external_node_modules = ["@swc/wasm-nodejs"]
-
-[[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/server"
-  status = 200
-  force = true
-
-[build.processing]
-  skip_processing = false
-[build.processing.css]
-  bundle = true
-  minify = true
-[build.processing.js]
-  bundle = true
-  minify = true
-[build.processing.html]
-  pretty_urls = true
-[build.processing.images]
-  compress = true
