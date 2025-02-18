@@ -29,6 +29,5 @@
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
     Access-Control-Allow-Credentials = "true"
 
-[context.production.environment]
-  STRIPE_SECRET_KEY = "process.env.STRIPE_SECRET_KEY"
-  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"
+[build.processing.environment]
+  SECRETS_SCAN_OMIT_KEYS = "STRIPE_SECRET_KEY,NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"
