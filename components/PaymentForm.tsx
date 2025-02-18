@@ -10,7 +10,11 @@ import {
 } from "@stripe/react-stripe-js";
 import type { Appearance } from "@stripe/stripe-js";
 
-const stripePromise = loadStripe('pk_test_51QiDnFIpu7s8bD02SNQhAi1aPbKvkhP67B9Ff7Rw4Smv3ZaP6qgGDcRwwcZI6UteAO6B0ibUcdeWRvc8HxbE3tCT00O0LwkPU2');
+if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
+  throw new Error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set');
+}
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 interface PaymentFormProps {
   clientSecret: string;

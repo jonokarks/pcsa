@@ -19,10 +19,7 @@
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["stripe"]
-  included_files = [
-    "app/api/create-payment-intent/route.ts",
-    "components/PaymentForm.tsx"
-  ]
+  included_files = ["app/api/**/*"]
 
 [[headers]]
   for = "/api/*"
@@ -38,4 +35,6 @@
   environment = { SECRETS_SCAN_ENABLED = "false" }
 
 [functions.next]
+  external_node_modules = ["stripe"]
   included_files = ["app/api/**/*"]
+  node_bundler = "esbuild"

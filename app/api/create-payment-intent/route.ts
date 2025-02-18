@@ -2,13 +2,29 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
 export const dynamic = 'force-dynamic';
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
-const stripe = new Stripe('sk_test_51QiDnFIpu7s8bD02mnhCE87eAp4T7aQmla2DHUe6LXziDg5gmMMy5HlYf2w6RGp6BmDJhQyTXDzAWqj3w6pgiD9300pDJAysuB', {
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('STRIPE_SECRET_KEY is not set');
+}
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-10-16",
   typescript: true,
-  httpClient: Stripe.createFetchHttpClient(),
 });
+
+function corsHeaders() {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Credentials': 'true',
+  };
+}
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders() });
+}
 
 export async function POST(req: Request) {
   try {
@@ -40,6 +56,7 @@ export async function POST(req: Request) {
         paymentIntentId: updatedIntent.id,
       }, {
         headers: {
+          ...corsHeaders(),
           'Cache-Control': 'no-store, must-revalidate',
           'Pragma': 'no-cache',
         },
@@ -63,6 +80,7 @@ export async function POST(req: Request) {
         paymentIntentId: paymentIntent.id,
       }, {
         headers: {
+          ...corsHeaders(),
           'Cache-Control': 'no-store, must-revalidate',
           'Pragma': 'no-cache',
         },
@@ -75,6 +93,7 @@ export async function POST(req: Request) {
       { 
         status: 500,
         headers: {
+          ...corsHeaders(),
           'Cache-Control': 'no-store, must-revalidate',
           'Pragma': 'no-cache',
         },
