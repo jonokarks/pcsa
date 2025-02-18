@@ -8,9 +8,16 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
-import type { Appearance } from "@stripe/stripe-js";
+import type { Appearance } from '@stripe/stripe-js';
 
+// Load Stripe outside of component to avoid recreation
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+
+// Define the options type
+type PaymentElementOptions = {
+  clientSecret: string;
+  appearance?: Appearance;
+};
 
 type StripePaymentResult = {
   id: string;
@@ -83,7 +90,7 @@ export default function PaymentForm({ clientSecret }: PaymentFormProps) {
     },
   };
 
-  const options = {
+  const options: PaymentElementOptions = {
     clientSecret,
     appearance,
   };

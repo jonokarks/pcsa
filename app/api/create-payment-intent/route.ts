@@ -4,7 +4,11 @@ import Stripe from "stripe";
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('STRIPE_SECRET_KEY must be defined');
+}
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-10-16",
   typescript: true,
 });
@@ -41,15 +45,28 @@ export async function OPTIONS() {
 }
 
 export async function POST(req: Request) {
+  console.log('Received request to create payment intent');
+  
   try {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error('STRIPE_SECRET_KEY is not set');
+      return NextResponse.json(
+        { error: "Stripe configuration error" },
+        { status: 500 }
+      );
+    }
+
     const body = await req.json() as RequestBody;
+    console.log('Request body:', JSON.stringify(body, null, 2));
+
     const { amount, customerDetails, paymentIntentId } = body;
 
     // Convert amount to cents
     const amountInCents = Math.round(amount * 100);
+    console.log('Amount in cents:', amountInCents);
 
     if (paymentIntentId) {
-      // Update existing payment intent
+      console.log('Updating existing payment intent:', paymentIntentId);
       const metadata: Record<string, string> = {
         firstName: customerDetails?.firstName || '',
         lastName: customerDetails?.lastName || '',
@@ -67,6 +84,7 @@ export async function POST(req: Request) {
         metadata
       });
 
+      console.log('Payment intent updated successfully');
       return NextResponse.json({
         clientSecret: updatedIntent.client_secret,
         paymentIntentId: updatedIntent.id,
@@ -78,7 +96,7 @@ export async function POST(req: Request) {
         },
       });
     } else {
-      // Create new payment intent
+      console.log('Creating new payment intent');
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amountInCents,
         currency: "aud",
@@ -91,6 +109,7 @@ export async function POST(req: Request) {
         },
       });
 
+      console.log('Payment intent created successfully');
       return NextResponse.json({
         clientSecret: paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id,
@@ -103,7 +122,9 @@ export async function POST(req: Request) {
       });
     }
   } catch (error) {
-    console.error("Error creating payment intent:", error);
+    console.error("Error in payment intent API:", error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error("Error details:", errorMessage);
     return NextResponse.json(
       { error: "Error creating payment intent" },
       { 

@@ -46,6 +46,7 @@ export default function CheckoutClient() {
       setError(null);
       
       try {
+        console.log('Creating payment intent...');
         const response = await fetch('/api/create-payment-intent', {
           method: 'POST',
           headers: {
@@ -60,11 +61,15 @@ export default function CheckoutClient() {
 
         if (!mounted) return;
 
+        console.log('Response status:', response.status);
+        const responseText = await response.text();
+        console.log('Response body:', responseText);
+
         if (!response.ok) {
-          throw new Error('Failed to create payment intent');
+          throw new Error(`Failed to create payment intent: ${responseText}`);
         }
 
-        const data = await response.json();
+        const data = JSON.parse(responseText);
         
         if (data.clientSecret && data.paymentIntentId) {
           setClientSecret(data.clientSecret);

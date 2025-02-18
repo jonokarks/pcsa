@@ -10,6 +10,18 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true
   },
+  env: {
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: '/.netlify/functions/next/:path*'
+      }
+    ];
+  },
   async headers() {
     return [
       {
