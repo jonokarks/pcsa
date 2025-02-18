@@ -4,10 +4,6 @@ const nextConfig = {
     unoptimized: true
   },
   poweredByHeader: false,
-  experimental: {
-    runtime: 'edge',
-    serverActions: true
-  },
   async headers() {
     return [
       {
