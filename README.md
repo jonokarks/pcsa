@@ -5,11 +5,11 @@ A modern, Next.js-based website for Pool Compliance SA, offering pool safety ins
 ## Features
 
 - Modern, responsive design using Tailwind CSS
-- Server-side rendering and static site generation with Next.js 14
-- Secure payment processing with Stripe
+- Dynamic server-side rendering with Next.js 14
+- Real-time Stripe payment processing
 - Shopping cart functionality
 - Contact form with form validation
-- SEO optimized with metadata and sitemap generation
+- SEO optimized with metadata
 - Mobile-friendly navigation
 
 ## Tech Stack
@@ -20,7 +20,6 @@ A modern, Next.js-based website for Pool Compliance SA, offering pool safety ins
 - Tailwind CSS
 - Stripe Payment Integration
 - React Hook Form
-- Next-Sitemap
 
 ## Getting Started
 
@@ -55,20 +54,32 @@ npm run dev
 
 The site will be available at `http://localhost:3000`
 
+### Development Mode
+
+The site is configured to run in development mode with:
+- Dynamic rendering for all pages
+- Real-time Stripe payment processing
+- Hot module reloading
+- TypeScript type checking
+
+To run in development mode:
+```bash
+npm run dev
+```
+
 ### Building for Production
 
 ```bash
 npm run build
+npm start
 ```
-
-This will create an optimized production build and generate the sitemap.
 
 ## Project Structure
 
 ```
 pool-compliance/
 ├── app/                    # Next.js app directory
-│   ├── api/               # API routes
+│   ├── api/               # API routes (dynamic)
 │   ├── about-us/          # About Us page
 │   ├── book-compliance/   # Booking page
 │   ├── checkout/          # Checkout process
@@ -83,36 +94,42 @@ pool-compliance/
 ## Features in Detail
 
 ### Booking System
-- Easy-to-use booking interface
+- Dynamic booking interface
 - Real-time price calculation
 - Optional CPR sign add-on
 
 ### Payment Processing
-- Secure Stripe integration
+- Real-time Stripe integration
 - Support for major credit cards
 - Automatic receipt generation
+- Dynamic payment intent creation
 
 ### Contact Form
 - Form validation
-- Auto-response confirmation
-- Admin notification system
+- Real-time error handling
+- Dynamic submission
 
-### SEO Optimization
-- Dynamic metadata
-- Automatic sitemap generation
-- Structured data implementation
+### Development Features
+- Hot module reloading
+- TypeScript type checking
+- ESLint integration
+- Prettier code formatting
 
 ## Deployment
 
-The site is configured for deployment on various platforms including Vercel, Netlify, or any Node.js hosting service.
-
-### Deployment Commands
+The site can be deployed to any Node.js hosting service. For local development:
 
 ```bash
-# Build the project
+# Install dependencies
+npm install
+
+# Run in development mode
+npm run dev
+
+# Build for production
 npm run build
 
-# Start the production server
+# Start production server
 npm start
 ```
 
