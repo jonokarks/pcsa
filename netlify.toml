@@ -1,10 +1,14 @@
 [build]
   command = "npm run build"
-  publish = "out"
+  publish = ".next"
 
 [build.environment]
+  NEXT_USE_NETLIFY_EDGE = "true"
   NODE_VERSION = "18"
   NPM_VERSION = "10"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
 
 [[headers]]
   for = "/*"
@@ -17,26 +21,11 @@
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
     Content-Security-Policy = "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data: blob:; font-src 'self' https: data:; connect-src 'self' https: wss:;"
 
-# Handle client-side routing
 [[redirects]]
   from = "/*"
-  to = "/404.html"
-  status = 404
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
+  to = "/.netlify/functions/next"
   status = 200
+  force = true
 
-[build.processing]
-  skip_processing = false
-[build.processing.css]
-  bundle = true
-  minify = true
-[build.processing.js]
-  bundle = true
-  minify = true
-[build.processing.html]
-  pretty_urls = true
-[build.processing.images]
-  compress = true
+[functions]
+  included_files = ["!node_modules/@next/swc-*/**/*"]
