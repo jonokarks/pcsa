@@ -6,8 +6,6 @@
   NODE_VERSION = "18"
   NPM_VERSION = "10"
   NEXT_USE_NETLIFY_EDGE = "true"
-  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "pk_test_51QiDnFIpu7s8bD02SNQhAi1aPbKvkhP67B9Ff7Rw4Smv3ZaP6qgGDcRwwcZI6UteAO6B0ibUcdeWRvc8HxbE3tCT00O0LwkPU2"
-  STRIPE_SECRET_KEY = "sk_test_51QiDnFIpu7s8bD02mnhCE87eAp4T7aQmla2DHUe6LXziDg5gmMMy5HlYf2w6RGp6BmDJhQyTXDzAWqj3w6pgiD9300pDJAysuB"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
@@ -30,19 +28,8 @@
     Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
     Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
     Access-Control-Allow-Credentials = "true"
-
-[build.processing]
-  skip_processing = false
-[build.processing.css]
-  bundle = true
-  minify = true
-[build.processing.js]
-  bundle = true
-  minify = true
-[build.processing.html]
-  pretty_urls = true
-[build.processing.images]
-  compress = true
+    Cache-Control = "no-store"
+    Pragma = "no-cache"
 
 [context.production]
   environment = { SECRETS_SCAN_ENABLED = "false" }

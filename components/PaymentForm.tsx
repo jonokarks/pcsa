@@ -10,7 +10,7 @@ import {
 } from "@stripe/react-stripe-js";
 import type { Appearance } from "@stripe/stripe-js";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+const stripePromise = loadStripe('pk_test_51QiDnFIpu7s8bD02SNQhAi1aPbKvkhP67B9Ff7Rw4Smv3ZaP6qgGDcRwwcZI6UteAO6B0ibUcdeWRvc8HxbE3tCT00O0LwkPU2');
 
 interface PaymentFormProps {
   clientSecret: string;
