@@ -2,14 +2,11 @@
 const nextConfig = {
   output: 'export',
   images: {
-    loader: 'custom',
-    loaderFile: './image-loader.js',
+    unoptimized: true
   },
   trailingSlash: true,
   poweredByHeader: false,
-  experimental: {
-    serverActions: true
-  },
+  distDir: 'out',
   webpack: (config) => {
     config.resolve.fallback = { fs: false, path: false };
     return config;
