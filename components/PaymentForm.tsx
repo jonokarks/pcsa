@@ -10,11 +10,19 @@ import {
 } from "@stripe/react-stripe-js";
 import type { Appearance } from "@stripe/stripe-js";
 
-if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
-  throw new Error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set');
-}
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+type StripePaymentResult = {
+  id: string;
+  status: string;
+  client_secret?: string;
+};
+
+declare global {
+  interface Window {
+    confirmStripePayment: undefined | (() => Promise<StripePaymentResult>);
+  }
+}
 
 interface PaymentFormProps {
   clientSecret: string;

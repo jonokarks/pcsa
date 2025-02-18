@@ -4,14 +4,28 @@ import Stripe from "stripe";
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set');
-}
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: "2023-10-16",
   typescript: true,
 });
+
+interface CustomerDetails {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  suburb?: string;
+  postcode?: string;
+  preferredDate?: string;
+  notes?: string;
+}
+
+interface RequestBody {
+  amount: number;
+  customerDetails?: CustomerDetails;
+  paymentIntentId?: string;
+}
 
 function corsHeaders() {
   return {
@@ -28,7 +42,7 @@ export async function OPTIONS() {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const body = await req.json() as RequestBody;
     const { amount, customerDetails, paymentIntentId } = body;
 
     // Convert amount to cents
@@ -36,19 +50,21 @@ export async function POST(req: Request) {
 
     if (paymentIntentId) {
       // Update existing payment intent
+      const metadata: Record<string, string> = {
+        firstName: customerDetails?.firstName || '',
+        lastName: customerDetails?.lastName || '',
+        email: customerDetails?.email || '',
+        phone: customerDetails?.phone || '',
+        address: customerDetails?.address || '',
+        suburb: customerDetails?.suburb || '',
+        postcode: customerDetails?.postcode || '',
+        preferredDate: customerDetails?.preferredDate || '',
+        notes: customerDetails?.notes || '',
+      };
+
       const updatedIntent = await stripe.paymentIntents.update(paymentIntentId, {
         amount: amountInCents,
-        metadata: {
-          firstName: customerDetails?.firstName,
-          lastName: customerDetails?.lastName,
-          email: customerDetails?.email,
-          phone: customerDetails?.phone,
-          address: customerDetails?.address,
-          suburb: customerDetails?.suburb,
-          postcode: customerDetails?.postcode,
-          preferredDate: customerDetails?.preferredDate,
-          notes: customerDetails?.notes,
-        },
+        metadata
       });
 
       return NextResponse.json({

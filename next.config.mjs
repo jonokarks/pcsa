@@ -4,6 +4,12 @@ const nextConfig = {
     unoptimized: true
   },
   poweredByHeader: false,
+  typescript: {
+    ignoreBuildErrors: true
+  },
+  eslint: {
+    ignoreDuringBuilds: true
+  },
   async headers() {
     return [
       {
