@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-// Force dynamic API route
 export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 const stripe = new Stripe('sk_test_51QiDnFIpu7s8bD02mnhCE87eAp4T7aQmla2DHUe6LXziDg5gmMMy5HlYf2w6RGp6BmDJhQyTXDzAWqj3w6pgiD9300pDJAysuB', {
   apiVersion: "2023-10-16",
   typescript: true,
+  httpClient: Stripe.createFetchHttpClient(),
 });
 
 export async function POST(req: Request) {
