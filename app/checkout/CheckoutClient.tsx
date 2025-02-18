@@ -47,7 +47,7 @@ export default function CheckoutClient() {
       
       try {
         console.log('Creating payment intent...');
-        const response = await fetch('/api/create-payment-intent', {
+        const response = await fetch('/.netlify/functions/create-payment-intent', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ export default function CheckoutClient() {
     setError(null);
 
     try {
-      const response = await fetch('/api/create-payment-intent', {
+      const response = await fetch('/.netlify/functions/create-payment-intent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

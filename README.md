@@ -6,7 +6,7 @@ A modern, Next.js-based website for Pool Compliance SA, offering pool safety ins
 
 - Modern, responsive design using Tailwind CSS
 - Dynamic server-side rendering with Next.js 14
-- Real-time Stripe payment processing
+- Serverless Stripe payment processing with Netlify Functions
 - Shopping cart functionality
 - Contact form with form validation
 - SEO optimized with metadata
@@ -18,8 +18,9 @@ A modern, Next.js-based website for Pool Compliance SA, offering pool safety ins
 - React 18
 - TypeScript
 - Tailwind CSS
-- Stripe Payment Integration
+- Stripe Payment Integration (Serverless)
 - React Hook Form
+- Netlify Functions
 
 ## Getting Started
 
@@ -27,6 +28,7 @@ A modern, Next.js-based website for Pool Compliance SA, offering pool safety ins
 
 - Node.js 18+ and npm
 - Stripe account for payment processing
+- Netlify account for deployment
 
 ### Installation
 
@@ -45,6 +47,7 @@ npm install
 ```env
 STRIPE_SECRET_KEY=your_stripe_secret_key
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+SITE_URL=your_site_url
 ```
 
 4. Start the development server:
@@ -58,7 +61,7 @@ The site will be available at `http://localhost:3000`
 
 The site is configured to run in development mode with:
 - Dynamic rendering for all pages
-- Real-time Stripe payment processing
+- Serverless Stripe payment processing
 - Hot module reloading
 - TypeScript type checking
 
@@ -79,15 +82,16 @@ npm start
 ```
 pool-compliance/
 ├── app/                    # Next.js app directory
-│   ├── api/               # API routes (dynamic)
 │   ├── about-us/          # About Us page
 │   ├── book-compliance/   # Booking page
 │   ├── checkout/          # Checkout process
 │   ├── contact/           # Contact page
 │   └── globals.css        # Global styles
 ├── components/            # React components
-├── context/              # React context providers
-├── public/               # Static assets
+├── context/               # React context providers
+├── netlify/               # Netlify serverless functions
+│   └── functions/         # Serverless function implementations
+├── public/                # Static assets
 └── types/                # TypeScript type definitions
 ```
 
@@ -99,10 +103,11 @@ pool-compliance/
 - Optional CPR sign add-on
 
 ### Payment Processing
-- Real-time Stripe integration
+- Serverless Stripe integration using Netlify Functions
 - Support for major credit cards
 - Automatic receipt generation
-- Dynamic payment intent creation
+- Secure payment processing with no server requirements
+- Dynamic payment intent creation through serverless functions
 
 ### Contact Form
 - Form validation
@@ -117,7 +122,18 @@ pool-compliance/
 
 ## Deployment
 
-The site can be deployed to any Node.js hosting service. For local development:
+The site is optimized for deployment on Netlify with serverless functions. For deployment:
+
+1. Connect your repository to Netlify
+2. Configure the following environment variables in Netlify:
+   - `STRIPE_SECRET_KEY`
+   - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+   - `SITE_URL`
+   - `NODE_ENV`
+
+3. Netlify will automatically deploy your site and set up the serverless functions.
+
+For local development:
 
 ```bash
 # Install dependencies
