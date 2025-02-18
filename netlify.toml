@@ -5,6 +5,30 @@
 [build.environment]
   NODE_VERSION = "18"
   NPM_VERSION = "10"
+  NEXT_USE_NETLIFY_EDGE = "true"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/next"
+  status = 200
+  force = true
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["stripe"]
+  included_files = ["!node_modules/@next/swc-*/**/*"]
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Credentials = "true"
+
+[context.production.environment]
+  STRIPE_SECRET_KEY = "process.env.STRIPE_SECRET_KEY"
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"

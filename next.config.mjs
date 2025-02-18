@@ -3,7 +3,11 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
-  poweredByHeader: false
+  poweredByHeader: false,
+  env: {
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY
+  }
 };
 
 export default nextConfig;
