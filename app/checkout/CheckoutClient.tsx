@@ -58,7 +58,6 @@ export default function CheckoutClient() {
           },
           body: JSON.stringify({
             amount: total,
-            items: [{ ...service, quantity: 1 }],
             includeCprSign,
           }),
         });
@@ -108,7 +107,6 @@ export default function CheckoutClient() {
         },
         body: JSON.stringify({
           amount: total,
-          items: [{ ...service, quantity: 1 }],
           includeCprSign,
           customerDetails: data,
           paymentIntentId,

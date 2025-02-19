@@ -68,6 +68,11 @@ export const handler: Handler = async (event: HandlerEvent): Promise<HandlerResp
 
     const amountInCents = Math.round(amount * 100);
 
+    // Calculate total with CPR sign if included
+    const baseAmount = amountInCents;
+    const cprSignAmount = body.includeCprSign ? 3000 : 0; // $30 in cents
+    const totalAmount = baseAmount + cprSignAmount;
+
     if (paymentIntentId) {
       const metadata: Record<string, string> = {
         firstName: customerDetails?.firstName || '',
@@ -79,10 +84,14 @@ export const handler: Handler = async (event: HandlerEvent): Promise<HandlerResp
         postcode: customerDetails?.postcode || '',
         preferredDate: customerDetails?.preferredDate || '',
         notes: customerDetails?.notes || '',
+        includeCprSign: body.includeCprSign ? "yes" : "no",
+        baseAmount: String(baseAmount / 100),
+        cprSignAmount: String(cprSignAmount / 100),
+        totalAmount: String(totalAmount / 100)
       };
 
       const updatedIntent = await stripe.paymentIntents.update(paymentIntentId, {
-        amount: amountInCents,
+        amount: totalAmount,
         metadata
       });
 
@@ -101,14 +110,26 @@ export const handler: Handler = async (event: HandlerEvent): Promise<HandlerResp
       };
     } else {
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: amountInCents,
+        amount: totalAmount,
         currency: "aud",
         automatic_payment_methods: {
           enabled: true,
         },
         metadata: {
           service: "Pool Compliance Inspection",
+          firstName: customerDetails?.firstName || '',
+          lastName: customerDetails?.lastName || '',
+          email: customerDetails?.email || '',
+          phone: customerDetails?.phone || '',
+          address: customerDetails?.address || '',
+          suburb: customerDetails?.suburb || '',
+          postcode: customerDetails?.postcode || '',
+          preferredDate: customerDetails?.preferredDate || '',
+          notes: customerDetails?.notes || '',
           includeCprSign: body.includeCprSign ? "yes" : "no",
+          baseAmount: String(baseAmount / 100),
+          cprSignAmount: String(cprSignAmount / 100),
+          totalAmount: String(totalAmount / 100),
           timestamp: new Date().toISOString(),
         },
       });
