@@ -22,6 +22,7 @@ interface RequestBody {
   amount: number;
   customerDetails?: CustomerDetails;
   paymentIntentId?: string;
+  includeCprSign?: boolean;
 }
 
 const corsHeaders = {
@@ -98,6 +99,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
         },
         metadata: {
           service: "Pool Compliance Inspection",
+          includeCprSign: body.includeCprSign ? "yes" : "no",
           timestamp: new Date().toISOString(),
         },
       });

@@ -1,7 +1,6 @@
 "use client";
 
 import AddToCartButton from "@/components/AddToCartButton";
-import { useCart } from "@/context/CartContext";
 
 const services = [
   {
@@ -20,9 +19,6 @@ const services = [
 ];
 
 export default function BookCompliancePage() {
-  const { items } = useCart();
-  const hasInspectionInCart = items.some(item => item.id === "pool-inspection");
-
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-4">
@@ -72,21 +68,7 @@ export default function BookCompliancePage() {
               </div>
 
               <div className="mt-8">
-                {hasInspectionInCart ? (
-                  <div className="text-center">
-                    <p className="text-gray-600 mb-4">
-                      Inspection service has been added to your cart.
-                    </p>
-                    <button
-                      onClick={() => window.location.href = "/checkout"}
-                      className="bg-teal-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-teal-700 transition duration-300"
-                    >
-                      Proceed to Checkout
-                    </button>
-                  </div>
-                ) : (
-                  <AddToCartButton service={services[0]} />
-                )}
+                <AddToCartButton service={services[0]} />
               </div>
             </div>
           </div>

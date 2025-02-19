@@ -1,6 +1,6 @@
 "use client";
 
-import { useCart } from "@/context/CartContext";
+import { useRouter } from "next/navigation";
 
 interface AddToCartButtonProps {
   service: {
@@ -11,20 +11,15 @@ interface AddToCartButtonProps {
 }
 
 export default function AddToCartButton({ service }: AddToCartButtonProps) {
-  const { addItem } = useCart();
+  const router = useRouter();
 
-  const handleAddToCart = () => {
-    addItem({
-      id: service.id,
-      name: service.name,
-      price: service.price,
-      quantity: 1,
-    });
+  const handleBookNow = () => {
+    router.push("/checkout");
   };
 
   return (
     <button
-      onClick={handleAddToCart}
+      onClick={handleBookNow}
       className="w-full bg-teal-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-teal-700 transition duration-300"
     >
       Book Now - ${service.price}

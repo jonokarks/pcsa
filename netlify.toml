@@ -9,6 +9,11 @@
   CI = "true"
   NODE_OPTIONS = "--max_old_space_size=4096"
   SECRETS_SCAN_ENABLED = "false"
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}"
+
+[functions.create-payment-intent]
+  included_files = []
+  external_node_modules = ["stripe"]
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

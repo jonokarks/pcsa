@@ -1,6 +1,5 @@
 "use client";
 
-import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -18,8 +17,13 @@ interface FormData {
   notes: string;
 }
 
+const service = {
+  id: "pool-inspection",
+  name: "Pool Safety Inspection",
+  price: 210,
+};
+
 export default function CheckoutClient() {
-  const cart = useCart();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [includeCprSign, setIncludeCprSign] = useState(false);
@@ -33,7 +37,7 @@ export default function CheckoutClient() {
     formState: { errors },
   } = useForm<FormData>();
 
-  const basePrice = cart.items[0]?.price || 210;
+  const basePrice = service.price;
   const cprSignPrice = 30;
   const total = basePrice + (includeCprSign ? cprSignPrice : 0);
 
@@ -54,7 +58,7 @@ export default function CheckoutClient() {
           },
           body: JSON.stringify({
             amount: total,
-            items: cart.items,
+            items: [{ ...service, quantity: 1 }],
             includeCprSign,
           }),
         });
@@ -84,21 +88,19 @@ export default function CheckoutClient() {
       }
     };
 
-    if (cart.items.length > 0) {
-      createInitialPaymentIntent();
-    }
+    createInitialPaymentIntent();
 
     return () => {
       mounted = false;
     };
-  }, [cart.items, includeCprSign, total]);
+  }, [includeCprSign, total]);
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     setError(null);
 
     try {
-      const response = await fetch('/.netlify/functions/create-payment-intent', {
+        const response = await fetch('/.netlify/functions/create-payment-intent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -106,7 +108,7 @@ export default function CheckoutClient() {
         },
         body: JSON.stringify({
           amount: total,
-          items: cart.items,
+          items: [{ ...service, quantity: 1 }],
           includeCprSign,
           customerDetails: data,
           paymentIntentId,
@@ -130,7 +132,6 @@ export default function CheckoutClient() {
       const paymentIntent = await window.confirmStripePayment();
       
       if (paymentIntent.status === 'succeeded') {
-        cart.clearCart();
         router.push("/checkout/success");
       } else {
         throw new Error('Payment failed');
@@ -141,25 +142,6 @@ export default function CheckoutClient() {
       setIsSubmitting(false);
     }
   };
-
-  if (cart.items.length === 0) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-2xl mx-auto text-center">
-            <h1 className="text-2xl font-bold mb-4">No Inspection Selected</h1>
-            <p className="text-gray-600 mb-6">Please select a pool inspection before proceeding to checkout.</p>
-            <button
-              onClick={() => router.push("/book-compliance")}
-              className="bg-teal-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-teal-700 transition duration-300"
-            >
-              Book Inspection
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-gray-50 py-12">
