@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import PaymentForm from "@/components/PaymentForm";
 
@@ -28,7 +28,6 @@ export default function CheckoutClient() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [includeCprSign, setIncludeCprSign] = useState(false);
   const [clientSecret, setClientSecret] = useState<string>("");
-  const [paymentIntentId, setPaymentIntentId] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   
   const {
@@ -41,16 +40,13 @@ export default function CheckoutClient() {
   const cprSignPrice = 30;
   const total = basePrice + (includeCprSign ? cprSignPrice : 0);
 
-  useEffect(() => {
-    let mounted = true;
+  const onSubmit = async (data: FormData) => {
+    setIsSubmitting(true);
+    setError(null);
 
-    const createInitialPaymentIntent = async () => {
-      if (!mounted) return;
-      
-      setError(null);
-      
-      try {
-        console.log('Creating payment intent...');
+    try {
+      // Only create payment intent if we don't have one yet
+      if (!clientSecret) {
         const response = await fetch('/.netlify/functions/create-payment-intent', {
           method: 'POST',
           headers: {
@@ -59,70 +55,25 @@ export default function CheckoutClient() {
           body: JSON.stringify({
             amount: total,
             includeCprSign,
+            customerDetails: data,
           }),
         });
 
-        if (!mounted) return;
-
-        console.log('Response status:', response.status);
-        const responseText = await response.text();
-        console.log('Response body:', responseText);
-
         if (!response.ok) {
-          throw new Error(`Failed to create payment intent: ${responseText}`);
+          throw new Error('Failed to create payment intent');
         }
 
-        const data = JSON.parse(responseText);
+        const result = await response.json();
         
-        if (data.clientSecret && data.paymentIntentId) {
-          setClientSecret(data.clientSecret);
-          setPaymentIntentId(data.paymentIntentId);
-        } else {
-          throw new Error('No client secret or payment intent ID in response');
+        if (result.error) {
+          throw new Error(result.error);
         }
-      } catch (error) {
-        if (mounted) {
-          setError('Error initializing payment. Please refresh the page and try again.');
-        }
-      }
-    };
 
-    createInitialPaymentIntent();
-
-    return () => {
-      mounted = false;
-    };
-  }, [includeCprSign, total]);
-
-  const onSubmit = async (data: FormData) => {
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-        const response = await fetch('/.netlify/functions/create-payment-intent', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache',
-        },
-        body: JSON.stringify({
-          amount: total,
-          includeCprSign,
-          customerDetails: data,
-          paymentIntentId,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update payment intent');
+        setClientSecret(result.clientSecret);
+        return; // Exit here to show the payment form
       }
 
-      const result = await response.json();
-      
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
+      // If we have a client secret, proceed with payment confirmation
       if (!window.confirmStripePayment) {
         throw new Error('Payment form not initialized');
       }
@@ -315,7 +266,11 @@ export default function CheckoutClient() {
                       isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                   >
-                    {isSubmitting ? 'Processing...' : `Pay $${total}`}
+                    {isSubmitting 
+                      ? 'Processing...' 
+                      : clientSecret 
+                        ? 'Confirm Payment' 
+                        : `Pay $${total}`}
                   </button>
                 </div>
               </form>

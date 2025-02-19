@@ -25,7 +25,6 @@ interface CustomerDetails {
 interface RequestBody {
   amount: number;
   customerDetails?: CustomerDetails;
-  paymentIntentId?: string;
   includeCprSign?: boolean;
 }
 
@@ -56,7 +55,7 @@ export const handler: Handler = async (event: HandlerEvent): Promise<HandlerResp
 
   try {
     const body = JSON.parse(event.body || '{}') as RequestBody;
-    const { amount, customerDetails, paymentIntentId } = body;
+    const { amount, customerDetails } = body;
 
     if (!amount || amount <= 0) {
       return {
@@ -66,15 +65,30 @@ export const handler: Handler = async (event: HandlerEvent): Promise<HandlerResp
       };
     }
 
-    const amountInCents = Math.round(amount * 100);
+    // Fixed prices
+    const BASE_PRICE = 21000; // $210 in cents
+    const CPR_SIGN_PRICE = 3000; // $30 in cents
 
-    // Calculate total with CPR sign if included
-    const baseAmount = amountInCents;
-    const cprSignAmount = body.includeCprSign ? 3000 : 0; // $30 in cents
+    // Calculate total
+    const baseAmount = BASE_PRICE;
+    const cprSignAmount = body.includeCprSign ? CPR_SIGN_PRICE : 0;
     const totalAmount = baseAmount + cprSignAmount;
 
-    if (paymentIntentId) {
-      const metadata: Record<string, string> = {
+    console.log('Payment calculation:', {
+      baseAmount: baseAmount / 100,
+      cprSignAmount: cprSignAmount / 100,
+      totalAmount: totalAmount / 100,
+      includeCprSign: body.includeCprSign
+    });
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: totalAmount,
+      currency: "aud",
+      automatic_payment_methods: {
+        enabled: true,
+      },
+      metadata: {
+        service: "Pool Compliance Inspection",
         firstName: customerDetails?.firstName || '',
         lastName: customerDetails?.lastName || '',
         email: customerDetails?.email || '',
@@ -87,67 +101,23 @@ export const handler: Handler = async (event: HandlerEvent): Promise<HandlerResp
         includeCprSign: body.includeCprSign ? "yes" : "no",
         baseAmount: String(baseAmount / 100),
         cprSignAmount: String(cprSignAmount / 100),
-        totalAmount: String(totalAmount / 100)
-      };
+        totalAmount: String(totalAmount / 100),
+        timestamp: new Date().toISOString(),
+      },
+    });
 
-      const updatedIntent = await stripe.paymentIntents.update(paymentIntentId, {
-        amount: totalAmount,
-        metadata
-      });
-
-      return {
-        statusCode: 200,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-store, must-revalidate',
-          'Pragma': 'no-cache',
-        } as const,
-        body: JSON.stringify({
-          clientSecret: updatedIntent.client_secret,
-          paymentIntentId: updatedIntent.id,
-        }),
-      };
-    } else {
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: totalAmount,
-        currency: "aud",
-        automatic_payment_methods: {
-          enabled: true,
-        },
-        metadata: {
-          service: "Pool Compliance Inspection",
-          firstName: customerDetails?.firstName || '',
-          lastName: customerDetails?.lastName || '',
-          email: customerDetails?.email || '',
-          phone: customerDetails?.phone || '',
-          address: customerDetails?.address || '',
-          suburb: customerDetails?.suburb || '',
-          postcode: customerDetails?.postcode || '',
-          preferredDate: customerDetails?.preferredDate || '',
-          notes: customerDetails?.notes || '',
-          includeCprSign: body.includeCprSign ? "yes" : "no",
-          baseAmount: String(baseAmount / 100),
-          cprSignAmount: String(cprSignAmount / 100),
-          totalAmount: String(totalAmount / 100),
-          timestamp: new Date().toISOString(),
-        },
-      });
-
-      return {
-        statusCode: 200,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-store, must-revalidate',
-          'Pragma': 'no-cache',
-        } as const,
-        body: JSON.stringify({
-          clientSecret: paymentIntent.client_secret,
-          paymentIntentId: paymentIntent.id,
-        }),
-      };
-    }
+    return {
+      statusCode: 200,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, must-revalidate',
+        'Pragma': 'no-cache',
+      } as const,
+      body: JSON.stringify({
+        clientSecret: paymentIntent.client_secret,
+      }),
+    };
   } catch (error) {
     console.error("Error in payment intent function:", error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

@@ -86,15 +86,15 @@ function PaymentFormContent() {
 }
 
 export default function PaymentForm({ clientSecret }: PaymentFormProps) {
-  if (!stripePromise) {
+  if (!stripePromise || !clientSecret) {
     return (
-      <div className="p-4 bg-red-50 text-red-700 rounded-lg">
-        Error: Stripe configuration is missing. Please try again later.
+      <div className="p-4 bg-gray-50 text-gray-600 rounded-lg text-center">
+        Please fill in your details and click "Pay" to proceed with payment.
       </div>
     );
   }
   const appearance: Appearance = {
-    theme: 'stripe' as const,
+    theme: 'stripe',
     variables: {
       colorPrimary: "#0d9488",
       colorBackground: "#ffffff",

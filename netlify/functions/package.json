@@ -6,5 +6,8 @@
   "dependencies": {
     "@netlify/functions": "^3.0.0",
     "stripe": "^14.25.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
