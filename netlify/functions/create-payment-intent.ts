@@ -1,7 +1,11 @@
-import { Handler, HandlerEvent } from '@netlify/functions';
+import type { Handler, HandlerEvent, HandlerResponse } from '@netlify/functions';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('STRIPE_SECRET_KEY must be defined');
+}
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-10-16",
   typescript: true,
 });
@@ -32,15 +36,35 @@ const corsHeaders = {
   'Access-Control-Allow-Credentials': 'true',
 } as const;
 
-export const handler: Handler = async (event: HandlerEvent) => {
-  console.log('Received request:', {
-    method: event.httpMethod,
-    path: event.path,
-    headers: event.headers,
-  });
+export const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> => {
+  // Set function timeout
+  const timeout = new Promise<never>((_, reject) => 
+    setTimeout(() => reject(new Error('Timeout')), 9000)
+  );
 
-  // Handle CORS preflight
+  try {
+    const result = await Promise.race([
+      handleRequest(event),
+      timeout
+    ]);
+    return result;
+  } catch (error: unknown) {
+    console.error('Function error:', error);
+    const isTimeout = error instanceof Error && error.message === 'Timeout';
+    return {
+      statusCode: isTimeout ? 504 : 500,
+      headers: corsHeaders,
+      body: JSON.stringify({ 
+        error: isTimeout ? 'Request timeout' : 'Internal server error' 
+      })
+    };
+  }
+};
+
+async function handleRequest(event: HandlerEvent): Promise<HandlerResponse> {
+
   if (event.httpMethod === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return {
       statusCode: 204,
       headers: corsHeaders,
@@ -58,10 +82,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
   }
 
   try {
-    console.log('Validating environment...');
-    if (!process.env.STRIPE_SECRET_KEY) {
-      throw new Error('STRIPE_SECRET_KEY is not set');
-    }
+    console.log('Processing request...');
 
     let body: RequestBody;
     try {

@@ -9,20 +9,11 @@
   CI = "true"
   NODE_OPTIONS = "--max_old_space_size=4096"
   SECRETS_SCAN_ENABLED = "false"
+  STRIPE_SECRET_KEY = "${STRIPE_SECRET_KEY}"
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}"
-
-[functions.create-payment-intent]
-  included_files = []
-  external_node_modules = ["stripe"]
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/next"
-  status = 200
-  force = true
 
 [functions]
   node_bundler = "esbuild"
@@ -38,10 +29,6 @@
   framework = "#custom"
   targetPort = 3000
 
-[build.environment]
-  STRIPE_SECRET_KEY = "${STRIPE_SECRET_KEY}"
-  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}"
-
 [[headers]]
   for = "/*"
   [headers.values]
@@ -51,7 +38,3 @@
     Access-Control-Allow-Credentials = "true"
     Cache-Control = "no-store"
     Pragma = "no-cache"
-
-[functions.next]
-  included_files = ["app/api/**/*"]
-  external_node_modules = ["stripe"]
