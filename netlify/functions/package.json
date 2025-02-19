@@ -1,0 +1,10 @@
+{
+  "name": "pool-compliance-functions",
+  "version": "1.0.0",
+  "private": true,
+  "main": "create-payment-intent.js",
+  "dependencies": {
+    "@netlify/functions": "^3.0.0",
+    "stripe": "^14.25.0"
+  }
+}

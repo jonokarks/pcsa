@@ -37,34 +37,8 @@ const corsHeaders = {
 } as const;
 
 export const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> => {
-  // Set function timeout
-  const timeout = new Promise<never>((_, reject) => 
-    setTimeout(() => reject(new Error('Timeout')), 9000)
-  );
-
-  try {
-    const result = await Promise.race([
-      handleRequest(event),
-      timeout
-    ]);
-    return result;
-  } catch (error: unknown) {
-    console.error('Function error:', error);
-    const isTimeout = error instanceof Error && error.message === 'Timeout';
-    return {
-      statusCode: isTimeout ? 504 : 500,
-      headers: corsHeaders,
-      body: JSON.stringify({ 
-        error: isTimeout ? 'Request timeout' : 'Internal server error' 
-      })
-    };
-  }
-};
-
-async function handleRequest(event: HandlerEvent): Promise<HandlerResponse> {
-
+  // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
-    console.log('Handling CORS preflight request');
     return {
       statusCode: 204,
       headers: corsHeaders,
@@ -73,7 +47,6 @@ async function handleRequest(event: HandlerEvent): Promise<HandlerResponse> {
   }
 
   if (event.httpMethod !== 'POST') {
-    console.log('Invalid method:', event.httpMethod);
     return {
       statusCode: 405,
       headers: corsHeaders,
@@ -82,30 +55,10 @@ async function handleRequest(event: HandlerEvent): Promise<HandlerResponse> {
   }
 
   try {
-    console.log('Processing request...');
-
-    let body: RequestBody;
-    try {
-      body = JSON.parse(event.body || '{}') as RequestBody;
-      console.log('Parsed request body:', {
-        amount: body.amount,
-        hasCustomerDetails: !!body.customerDetails,
-        paymentIntentId: body.paymentIntentId,
-        includeCprSign: body.includeCprSign,
-      });
-    } catch (error) {
-      console.error('Failed to parse request body:', error);
-      return {
-        statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'Invalid request body' }),
-      };
-    }
-
+    const body = JSON.parse(event.body || '{}') as RequestBody;
     const { amount, customerDetails, paymentIntentId } = body;
 
     if (!amount || amount <= 0) {
-      console.error('Invalid amount:', amount);
       return {
         statusCode: 400,
         headers: corsHeaders,
@@ -113,12 +66,9 @@ async function handleRequest(event: HandlerEvent): Promise<HandlerResponse> {
       };
     }
 
-    console.log('Converting amount to cents...');
     const amountInCents = Math.round(amount * 100);
-    console.log('Amount in cents:', amountInCents);
 
     if (paymentIntentId) {
-      console.log('Updating existing payment intent:', paymentIntentId);
       const metadata: Record<string, string> = {
         firstName: customerDetails?.firstName || '',
         lastName: customerDetails?.lastName || '',
@@ -131,7 +81,6 @@ async function handleRequest(event: HandlerEvent): Promise<HandlerResponse> {
         notes: customerDetails?.notes || '',
       };
 
-      console.log('Updating payment intent with metadata...');
       const updatedIntent = await stripe.paymentIntents.update(paymentIntentId, {
         amount: amountInCents,
         metadata
@@ -151,7 +100,6 @@ async function handleRequest(event: HandlerEvent): Promise<HandlerResponse> {
         }),
       };
     } else {
-      console.log('Creating new payment intent...');
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amountInCents,
         currency: "aud",

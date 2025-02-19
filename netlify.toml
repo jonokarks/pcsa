@@ -9,8 +9,6 @@
   CI = "true"
   NODE_OPTIONS = "--max_old_space_size=4096"
   SECRETS_SCAN_ENABLED = "false"
-  STRIPE_SECRET_KEY = "${STRIPE_SECRET_KEY}"
-  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

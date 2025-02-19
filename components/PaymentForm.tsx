@@ -10,8 +10,17 @@ import {
 } from "@stripe/react-stripe-js";
 import type { Appearance } from '@stripe/stripe-js';
 
-// Load Stripe outside of component to avoid recreation
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+// Initialize Stripe with error handling
+const getStripe = () => {
+  const key = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+  if (!key) {
+    console.error('Stripe publishable key is not set');
+    return null;
+  }
+  return loadStripe(key);
+};
+
+const stripePromise = getStripe();
 
 // Define the options type
 type PaymentElementOptions = {
@@ -77,6 +86,13 @@ function PaymentFormContent() {
 }
 
 export default function PaymentForm({ clientSecret }: PaymentFormProps) {
+  if (!stripePromise) {
+    return (
+      <div className="p-4 bg-red-50 text-red-700 rounded-lg">
+        Error: Stripe configuration is missing. Please try again later.
+      </div>
+    );
+  }
   const appearance: Appearance = {
     theme: 'stripe' as const,
     variables: {
