@@ -10,17 +10,8 @@ import {
 } from "@stripe/react-stripe-js";
 import type { Appearance } from '@stripe/stripe-js';
 
-// Initialize Stripe with error handling
-const getStripe = () => {
-  const key = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-  if (!key) {
-    console.error('Stripe publishable key is not set');
-    return null;
-  }
-  return loadStripe(key);
-};
-
-const stripePromise = getStripe();
+// Initialize Stripe
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 // Define the options type
 type PaymentElementOptions = {

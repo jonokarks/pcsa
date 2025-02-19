@@ -33,10 +33,7 @@
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["stripe"]
-
-[functions.create-payment-intent]
-  included_files = []
-  external_node_modules = ["stripe"]
+  included_files = ["netlify/functions/package.json"]
 
 [dev]
   functions = "netlify/functions"
