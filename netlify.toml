@@ -1,5 +1,5 @@
 [build]
-  command = "npm ci && npm run build"
+  command = "npm install --prefer-offline && npm run build"
   publish = ".next"
 
 [build.environment]
@@ -9,6 +9,23 @@
   CI = "true"
   NODE_OPTIONS = "--max_old_space_size=4096"
   SECRETS_SCAN_ENABLED = "false"
+
+[build.processing]
+  skip_processing = false
+
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+
+[build.processing.html]
+  pretty_urls = true
+
+[build.processing.images]
+  compress = true
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
