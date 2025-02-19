@@ -33,33 +33,71 @@ const corsHeaders = {
 } as const;
 
 export const handler: Handler = async (event: HandlerEvent) => {
+  console.log('Received request:', {
+    method: event.httpMethod,
+    path: event.path,
+    headers: event.headers,
+  });
+
+  // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
     return {
-      statusCode: 200,
+      statusCode: 204,
       headers: corsHeaders,
       body: '',
     };
   }
 
   if (event.httpMethod !== 'POST') {
+    console.log('Invalid method:', event.httpMethod);
     return {
       statusCode: 405,
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'Method not allowed' }),
     };
   }
 
   try {
+    console.log('Validating environment...');
     if (!process.env.STRIPE_SECRET_KEY) {
       throw new Error('STRIPE_SECRET_KEY is not set');
     }
 
-    const body = JSON.parse(event.body || '{}') as RequestBody;
+    let body: RequestBody;
+    try {
+      body = JSON.parse(event.body || '{}') as RequestBody;
+      console.log('Parsed request body:', {
+        amount: body.amount,
+        hasCustomerDetails: !!body.customerDetails,
+        paymentIntentId: body.paymentIntentId,
+        includeCprSign: body.includeCprSign,
+      });
+    } catch (error) {
+      console.error('Failed to parse request body:', error);
+      return {
+        statusCode: 400,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: 'Invalid request body' }),
+      };
+    }
+
     const { amount, customerDetails, paymentIntentId } = body;
 
-    // Convert amount to cents
+    if (!amount || amount <= 0) {
+      console.error('Invalid amount:', amount);
+      return {
+        statusCode: 400,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: 'Invalid amount' }),
+      };
+    }
+
+    console.log('Converting amount to cents...');
     const amountInCents = Math.round(amount * 100);
+    console.log('Amount in cents:', amountInCents);
 
     if (paymentIntentId) {
+      console.log('Updating existing payment intent:', paymentIntentId);
       const metadata: Record<string, string> = {
         firstName: customerDetails?.firstName || '',
         lastName: customerDetails?.lastName || '',
@@ -72,6 +110,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
         notes: customerDetails?.notes || '',
       };
 
+      console.log('Updating payment intent with metadata...');
       const updatedIntent = await stripe.paymentIntents.update(paymentIntentId, {
         amount: amountInCents,
         metadata
@@ -91,6 +130,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
         }),
       };
     } else {
+      console.log('Creating new payment intent...');
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amountInCents,
         currency: "aud",

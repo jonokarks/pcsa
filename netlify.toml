@@ -27,7 +27,20 @@
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["stripe"]
-  included_files = ["app/api/**/*"]
+
+[functions.create-payment-intent]
+  included_files = []
+  external_node_modules = ["stripe"]
+
+[dev]
+  functions = "netlify/functions"
+  publish = ".next"
+  framework = "#custom"
+  targetPort = 3000
+
+[build.environment]
+  STRIPE_SECRET_KEY = "${STRIPE_SECRET_KEY}"
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}"
 
 [[headers]]
   for = "/*"
